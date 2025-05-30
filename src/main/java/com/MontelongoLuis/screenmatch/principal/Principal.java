@@ -1,13 +1,17 @@
 package com.MontelongoLuis.screenmatch.principal;
 
+import com.MontelongoLuis.screenmatch.model.DatosEpisodios;
 import com.MontelongoLuis.screenmatch.model.DatosSeries;
 import com.MontelongoLuis.screenmatch.model.DatosTemporadas;
+import com.MontelongoLuis.screenmatch.model.Episodio;
 import com.MontelongoLuis.screenmatch.service.ConsumoAPI;
 import com.MontelongoLuis.screenmatch.service.ConvierteDatos;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Principal {
 
@@ -41,6 +45,25 @@ public class Principal {
         }
         //temporadas.forEach(System.out::println);
 
-        temporadas.forEach(t-> t.listEpisodios().forEach(e -> System.out.println(e.title()) ) );
+       // temporadas.forEach(t-> t.listEpisodios().forEach(e -> System.out.println(e.title()) ) );
+
+        System.out.println("Los mejores episodios son: ");
+        List<DatosEpisodios> best10Episodios = temporadas.stream()
+                .flatMap(t ->t.listEpisodios().stream())
+                .collect(Collectors.toList());
+
+        best10Episodios.stream()
+                .filter(e -> !e.rating().equalsIgnoreCase("N/A"))
+                .sorted(Comparator.comparing(DatosEpisodios::rating).reversed())
+                .limit(5)
+                .forEach(System.out::println);
+
+        //Convertir los datos a una lista de tipo Episodio
+        List<Episodio> episodios = temporadas.stream()
+                .flatMap(t -> t.listEpisodios().stream()
+                        .map(d -> new Episodio(t.numTemporada(),d)))
+                .collect(Collectors.toList());
+
+        episodios.forEach(System.out::println);
     }
 }
