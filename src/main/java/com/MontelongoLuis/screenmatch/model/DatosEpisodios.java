@@ -9,4 +9,14 @@ public record DatosEpisodios (
         @JsonAlias("imdbRating") String rating,
         @JsonAlias("Released") String released,
         @JsonAlias("Episode") Integer numEpisode
-){}
+){
+
+    @Override
+    public String toString() {
+        return
+                "T:'" + title + '\'' +
+                ", Rating:'" + rating + '\'' +
+                ", Lanzamiento:'" + released + '\'' +
+                ", E:" + numEpisode ;
+    }
+}

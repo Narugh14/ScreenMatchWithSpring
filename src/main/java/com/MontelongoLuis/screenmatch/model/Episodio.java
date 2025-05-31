@@ -39,10 +39,11 @@ public class Episodio {
 
     @Override
     public String toString() {
-        return "numTemporada=" + numTemporada +
-                ", titulo='" + titulo + '\'' +
-                ", numEpisodio=" + numEpisodio +
-                ", evaluacion=" + evaluacion +
-                ", fechaLanzamiento=" + fechaLanzamiento;
+        return "{ T:" + numTemporada +
+                " E:" + numEpisodio +
+                ", Titulo:'" + titulo + '\'' +
+                ", Evaluacion: " + evaluacion +
+                ", Lanzamiento: " + fechaLanzamiento
+                + " }";
     }
 }
