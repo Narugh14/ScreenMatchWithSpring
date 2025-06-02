@@ -18,11 +18,51 @@ public class Principal {
     private Scanner teclado = new Scanner(System.in);
     private ConsumoAPI consumoAPI = new ConsumoAPI();
     private ConvierteDatos convierte = new ConvierteDatos();
+    private List<DatosSeries> datosSeries = new ArrayList<>();
 
     private final String URL_BASE = "http://www.omdbapi.com/?t=";
     private final String API_KEY = "&apikey=9d1156f5";
 
     public void mostrarMenu() {
+
+        var opcion = -1;
+
+        while(opcion!= 0){
+               var menu = """
+                       
+                       Eliga una opcion valida para comenzar:
+                       
+                       1 - Buscar Serie
+                       2 - Buscar episodios
+                       3 - Lista de Series buscadas recientemente
+                       
+                       0 - Salir del Programa
+                       """;
+            System.out.println(menu);
+            opcion = teclado.nextInt();
+            teclado.nextLine();
+
+            switch (opcion){
+                case 1:
+                    busquedaSerieWeb();
+                    break;
+                case 2:
+                    buscarListEpisodio();
+                    break;
+                case 3:
+                    mostrarSeriesBuscadas();
+                    break;
+                case 0:
+                    System.out.println("Cerrando aplicación");
+                    break;
+                default:
+                    System.out.println("Seleccione escribiendo alguna opcion valida");
+            }
+        }
+}
+
+
+    private DatosSeries getObtenerDatos(){
         System.out.println("Escribe que serie deseas buscar mas informacion:");
         var serie = teclado.nextLine();
         //Datos generales de la serie
@@ -31,85 +71,32 @@ public class Principal {
                         + serie.replace(" ", "+")
                         + API_KEY);
 
-        var datos = convierte.obtenerDatos(json, DatosSeries.class);
+        return convierte.obtenerDatos(json, DatosSeries.class);
+    }
 
-        System.out.println(datos);
-
+    private void buscarListEpisodio() {
+        var datosSerie = getObtenerDatos();
         //Creamos una lista para los episodios de cada temporada
         List<DatosTemporadas> temporadas = new ArrayList<>();
         //Guardamos los episodios en una lista por cada temporada
-        for (int i = 1; i <= datos.totalSeasons(); i++) {
-            json = consumoAPI.obtenerDatos(URL_BASE
-                    + serie.replace(" ", "+") + "&Season=" + i + API_KEY);
-            var datosTemporadas = convierte.obtenerDatos(json, DatosTemporadas.class);
+        for (int i = 1; i <= datosSerie.totalSeasons(); i++) {
+            var json = consumoAPI.obtenerDatos(URL_BASE
+                    + datosSerie.title().replace(" ", "+") + "&Season=" + i + API_KEY);
+           DatosTemporadas datosTemporadas = convierte.obtenerDatos(json, DatosTemporadas.class);
             temporadas.add(datosTemporadas);
         }
-        //temporadas.forEach(System.out::println);
+        temporadas.forEach(System.out::println);
+    }
 
-        // temporadas.forEach(t-> t.listEpisodios().forEach(e -> System.out.println(e.title()) ) );
+    private void busquedaSerieWeb() {
+        DatosSeries serie = getObtenerDatos();
+        datosSeries.add(serie);
+        System.out.println(serie);
+    }
 
-//        System.out.println("Los mejores episodios son: ");
-        List<DatosEpisodios> best10Episodios = temporadas.stream()
-                .flatMap(t -> t.listEpisodios().stream())
-                .collect(Collectors.toList());
-
-//        best10Episodios.stream()
-//                .filter(e -> !e.rating().equalsIgnoreCase("N/A"))
-//                .sorted(Comparator.comparing(DatosEpisodios::rating).reversed())
-//                .limit(5)
-//                .forEach(System.out::println);
-
-        //Convertir los datos a una lista de tipo Episodio
-        List<Episodio> episodios = temporadas.stream()
-                .flatMap(t -> t.listEpisodios().stream()
-                        .map(d -> new Episodio(t.numTemporada(), d)))
-                .collect(Collectors.toList());
-
-//        episodios.forEach(System.out::println);
-
-        //Busqueda de episodios a partir de X año
-//        System.out.println("Escribe el año para apartir de eso, hacer la busqueda de los episodios:");
-//        var fecha = teclado.nextInt();
-//        teclado.nextLine();
-
-//        LocalDate fechaBusqueda = LocalDate.of(fecha,1, 1);
-
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-//        episodios.stream()
-//                .filter(e -> e.getFechaLanzamiento() != null && e.getFechaLanzamiento().isAfter(fechaBusqueda))
-//                .forEach(e ->System.out.println(
-//                        "T:" + e.getNumTemporada() +
-//                                " E:" + e.getNumEpisodio()+
-//                                ", T:" + e.getTitulo().substring(0,Math.min(e.getTitulo().length(),15))+
-//                                ", Fecha estreno " +  e.getFechaLanzamiento().format(dtf)
-//
-//                ));
-//        System.out.println("Escribre algun texto de un episodio para la busqueda: ");
-//        var textoTituloEpisodo = teclado.nextLine();
-//        Optional<Episodio> BusquedaResult = episodios.stream()
-//                .filter(e -> e.getTitulo().toUpperCase().contains(textoTituloEpisodo.toUpperCase()))
-//                .findFirst();
-//        if (BusquedaResult.isPresent()){
-//            System.out.println("El capitulo encontrado es: " + BusquedaResult.get().getTitulo());
-//        }else{
-//            System.out.println("Episodio no encontrado");
-//        }
-
-
-        Map<Integer, Double> evaluacionForTemporadas = episodios.stream()
-                .filter(e -> e.getEvaluacion() > 0.0)
-                .collect(Collectors.groupingBy(Episodio::getNumTemporada,
-                        Collectors.averagingDouble(Episodio::getEvaluacion)));
-        System.out.println(evaluacionForTemporadas);
-
-
-        DoubleSummaryStatistics est = episodios.stream()
-                .filter(e -> e.getEvaluacion() > 0.0)
-                .collect(Collectors.summarizingDouble(Episodio::getEvaluacion));
-        System.out.println("Episodios contados: "+ est.getCount());
-        System.out.println("Calificacion promedio de la serie: " + est.getAverage());
-        System.out.println("Calificacion mas alta de un episodio: " + est.getMax());
+    private void mostrarSeriesBuscadas() {
+        System.out.println("Titulos buscados recientemente");
+        datosSeries.forEach(System.out::println);
     }
 }
 
