@@ -1,9 +1,6 @@
 package com.MontelongoLuis.screenmatch.principal;
 
-import com.MontelongoLuis.screenmatch.model.DatosEpisodios;
-import com.MontelongoLuis.screenmatch.model.DatosSeries;
-import com.MontelongoLuis.screenmatch.model.DatosTemporadas;
-import com.MontelongoLuis.screenmatch.model.Episodio;
+import com.MontelongoLuis.screenmatch.model.*;
 import com.MontelongoLuis.screenmatch.service.ConsumoAPI;
 import com.MontelongoLuis.screenmatch.service.ConvierteDatos;
 
@@ -95,8 +92,16 @@ public class Principal {
     }
 
     private void mostrarSeriesBuscadas() {
+        List<Serie> series = new ArrayList<>();
+        series = datosSeries.stream()
+                        .map(t -> new Serie(t))
+                                .collect(Collectors.toList());
+
         System.out.println("Titulos buscados recientemente");
-        datosSeries.forEach(System.out::println);
+
+        series.stream()
+                        .sorted(Comparator.comparing(Serie::getGenero))
+                        .forEach(System.out::println);
     }
 }
 
