@@ -1,22 +1,36 @@
 package com.MontelongoLuis.screenmatch.model;
 
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
+@Entity
+@Table(name="episodios")
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter @Setter
 public class Episodio {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private Integer numTemporada;
+    @Column(unique = true)
     private String titulo;
+    private Integer numTemporada;
     private Integer numEpisodio;
     private Double evaluacion;
     private LocalDate fechaLanzamiento;
+
+    @ManyToOne
+    private Serie serie;
 
     public Episodio(Integer temporada, DatosEpisodios d) {
 
