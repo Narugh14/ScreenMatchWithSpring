@@ -2,7 +2,7 @@ package com.MontelongoLuis.screenmatch.model;
 
 public enum Categoria {
 
-    ACCION("Action","Accion"),
+    ACCION("Action","Acción"),
     ROMANCE("Romance","Romance"),
     COMEDIA("Comedy","Comedia"),
     DRAMA("Drama","Drama"),
